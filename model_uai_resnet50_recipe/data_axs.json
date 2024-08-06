@@ -1,0 +1,86 @@
+{
+    "_parent_entries": [ [ "^", "byname", "python_script" ], [ "^", "byname", "entry_creator" ] ],
+    
+    "_producer_rules": [
+        [
+            [ "kilt_ready", "device=uai", "model_name=resnet50" ],
+            [["get", "pipeline"]]
+        ]
+    ],
+
+    "device": "uai",
+    "model_name": "resnet50",
+    "batch_size": 10,
+	"set_device_id": "all",
+    "images_directory": "/server/datasets/imageNet/val",
+
+    "pipeline": [ "^^", "execute", [[
+        [ "run" ],
+        [],
+        [ "get", "stored_newborn_entry" ]
+    ]] ],
+
+    "newborn_entry_tags": [ "kilt_ready" ],
+    "newborn_name_template": "model_#{device}#_#{model_name}#_with_batch_size_#{batch_size}#",
+    "newborn_entry_param_names": [
+        "device",
+        "model_name",
+        "batch_size",
+        "set_device_id",
+        "input_data_types",
+        "weight_data_types",
+        "weight_transformations",
+        "model_input_format",
+        "model_output_format",
+        "retrained",
+        "url",
+        "seed",
+        "output_file_name",
+        "bias",
+        "images_directory",
+        "calib_list_file_name"
+    ],
+
+    "seed": 33,
+    "bias": -4,
+
+    "original_model_query": [ "^^", "substitute", [["downloaded", "onnx_model", "option=opset11", "model_name=#{model_name}#" ]] ],
+    "original_model_path":[ "^^", "execute", [[
+        [ "get_kernel" ],
+        [ "byquery", [[ "^^", "get", "original_model_query" ]], {}, ["original_model_query"] ],
+        [ "get_path" ]
+    ]] ],
+
+    "calib_list_file_name": "calibration/ImageNet/cal_image_list_option_1.txt",
+    "mlperf_query": [ "^^", "substitute", [["git_repo", "repo_name=mlperf_inference_git" ]] ],
+    "calib_list_path":[ "^^", "execute", [[
+        [ "get_kernel" ],
+        [ "byquery", [[ "^^", "get", "mlperf_query" ]], {}, ["mlperf_query"] ],
+        [ "get_path", [ "^^", "substitute", "#{calib_list_file_name}#"] ]
+    ]] ],
+
+	"input_data_types" : "float8",
+	"weight_data_types": "float8",
+	"weight_transformations": "see closed/Untether/calibration.md",
+	"model_input_format": "UINT8,1,224,224,3",
+	"model_output_format": "INT64,1",
+	"retrained": false,
+	"url": "https://zenodo.org/record/4735647/files/resnet50_v1.onnx",
+
+    "output_file_name": "quantized_model/program.uxf",
+
+    "untether_path": "/opt/untether",
+
+    "extra_env": {
+        "BES_INCLUDE_PATH": [ "^^", "substitute", "#{untether_path}#/speedai/include/bes" ],
+        "BANK_INCLUDE_PATH": [ "^^", "substitute", "#{untether_path}#/speedai/include/bank" ],
+        "KERNEL_INCLUDE_PATH": [ "^^", "substitute", "#{untether_path}#/speedai-sdk/include/model_creator/h" ],
+        "BES_TOOLS_PATH": [ "^^", "substitute", "#{untether_path}#/speedai-sdk/lib/bank" ],
+        "IMAIGINE_HOME": [ "^^", "substitute", "#{untether_path}#/speedai-sdk" ],
+        "SPEEDAI_SOCKET_RESET": 0,
+        "BOQ_TARGET": "speedAI240BC-ES"
+    },
+
+    "rel_script_path": "generate.py",
+    "script_extra_params": [ "^^", "substitute", "#{batch_size}# #{seed}# #{newborn_entry_path}# #{original_model_path}# #{images_directory}# #{calib_list_path}#" ]
+}

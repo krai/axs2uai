@@ -1,0 +1,69 @@
+{
+    "_parent_entries": [[ "^", "byname", "entry_creator" ]],
+    
+    "_producer_rules": [
+        [
+            [ "quantized", "dataset_name=imagenet", "preprocess_method=opencv", "quantize_method=untether" ],
+            [["get", "pipeline"]]
+        ]
+    ],
+
+    "dataset_size": 50000,
+    "dataset_name": "imagenet",
+    "preprocess_method": "opencv",
+    "quantize_method": "untether",
+    "bias": -4,
+
+    "images_directory": "/server/datasets/imageNet/val",
+    "images_directory_info": [ "^^", "case", [ [ "^^", "get", "dataset_size" ],
+        500, "",
+        50000, [ "^^", "substitute", ",images_directory=#{images_directory}#,flat_dataset_structure-" ]
+    ], { "default_value": false } ],
+
+    "pipeline": [ "^^", "execute", [[
+        [ "quantize" ],
+        [],
+        [ "get", "stored_newborn_entry" ]
+    ]] ],
+
+    "newborn_entry_tags": ["quantized_dataset" ],
+    "newborn_name_template": "quantized_imagenet_using_uai_from_#{preprocessed_dtype}#_to_#{quantized_dtype}#_dataset_size_#{dataset_size}#",
+    "newborn_entry_param_names": [
+        "preprocess_method",
+        "quantize_method",
+        "dataset_name",
+        "dataset_size",
+        "preprocessed_dtype",
+        "quantized_dtype",
+        "resolution",
+        "given_channel_means",
+        "bias",
+        "images_directory"
+    ],
+
+    "numpy_query":  [ "python_package", "package_name=numpy",  ["desired_python_version", ["^", "kernel_python_major_dot_minor"]] ],
+
+    "_BEFORE_CODE_LOADING": [ "^^", "execute", [[
+        ["get_kernel"],
+        ["byquery", [[ "^^", "get", "numpy_query" ]] ],
+        ["use"]
+    ]] ],
+
+    "model_query": "\"downloaded,onnx_model,option=opset11,model_name=resnet50\"",
+    "preprocessed_dataset_entry": [ "^^", "execute", [[
+        [ "get_kernel" ],
+        [ "byquery", [ "^^", "substitute", "preprocessed,dataset_name=#{dataset_name}#,preprocess_method=#{preprocess_method}#,first_n=#{dataset_size}#,model_query=#{model_query}##{images_directory_info}#" ] ]
+    ]] ],
+        
+    "preprocessed_dataset_path": [ "^^", "execute", [[
+        [ "get", "preprocessed_dataset_entry" ],
+        [ "get_path" , [[ "preprocessed" ]] ]
+    ]] ],
+
+    "preprocessed_dtype": "uint8",
+    "quantized_dtype": "FP8p",
+    "given_channel_means": [ "^^", "dig", "preprocessed_dataset_entry.given_channel_means" ],
+    "resolution": [ "^^", "dig", "preprocessed_dataset_entry.resolution" ],
+
+    "rel_file_path": "quantized"
+}

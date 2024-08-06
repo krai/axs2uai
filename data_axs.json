@@ -1,0 +1,26 @@
+{
+    "_parent_entries": [
+        [
+            "^",
+            "core_collection"
+        ],
+        [
+            "^",
+            "byname",
+            "git"
+        ]
+    ],
+    "tags": [
+        "git_repo",
+        "collection"
+    ],
+    "contained_entries": {
+        "benchmarks_collection": "benchmarks_collection",
+        "quantize_preprocessed_imagenet": "quantize_preprocessed_imagenet",
+        "model_onnx_opset11_resnet50_recipe": "model_onnx_opset11_resnet50_recipe",
+        "model_uai_resnet50_recipe": "model_uai_resnet50_recipe"
+    },
+    "repo_name": "axs2uai",
+    "submodules": false,
+    "checkout": "main"
+}

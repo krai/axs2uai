@@ -1,0 +1,6 @@
+{
+    "contained_entries": {
+        "image_classification_using_uai_kilt_compile": "image_classification_using_uai_kilt_compile",
+        "image_classification_using_uai_kilt_run": "image_classification_using_uai_kilt_run"
+    }
+}

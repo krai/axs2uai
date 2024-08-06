@@ -1,0 +1,29 @@
+{
+    "_producer_rules": [
+        [ [ "downloaded", "onnx_model", "option=opset11", "model_name=resnet50" ], [["get_kernel"],["byname","downloader"],["download"]], {
+            "dataset_name": "imagenet",
+            "url": "https://zenodo.org/record/4735647/files/resnet50_v1.onnx",
+            "md5": "f6a4da60cd5f084d97efc2c1ddb10beb",
+            "model_name": "resnet50",
+            "model_rel_path": "resnet50_v1.onnx",
+            "resolution": 224,
+            "normalization": {
+                "normalize_symmetric": null,
+                "subtract_mean_bool": true,
+                "given_channel_means": [ 123.68, 116.78, 103.94 ],
+                "given_channel_stds": [],
+                "data_layout": "NHWC"
+            },
+            "input_layer_name": "input_tensor",
+            "output_layer_name": "softmax_tensor",
+
+            "starting_weights_filename": "https://zenodo.org/record/4735647/files/resnet50_v1.onnx",
+            "retrained": false,
+            "input_data_types": "fp32",
+            "weight_data_types": "fp32",
+            "weight_transformations": "",
+            "input_layer_names": ["input_tensor"],
+            "output_layer_names": ["ArgMax"]
+        } ]
+    ]
+}

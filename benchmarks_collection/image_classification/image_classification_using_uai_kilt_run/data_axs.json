@@ -1,0 +1,167 @@
+{
+    "_parent_entries": [ [ "^", "byname", "shell" ], ["^", "byname", "base_image_classification_kilt_program"] ],
+    "_producer_rules": [
+            [ [ "loadgen_output", "task=image_classification", "device=uai", "framework=kilt" ], [["get", "pipeline"]] ]
+    ],
+
+    "model_name": "resnet50",
+
+    "device": "uai",
+
+    "loadgen_scenario": "SingleStream",
+
+    "loadgen_trigger_cold_run": true,
+
+    "dataset_imagenet_preprocessed_input_square_side": 224,
+
+    "ml_model_has_background_class": "NO",
+
+    "images_directory": "/server/datasets/imageNet/val",
+
+    "compiled_model_source_query": [ "^^", "substitute", [["kilt_ready", "device=#{device}#", "model_name=#{model_name}#", "batch_size=#{kilt_device_uai_model_batch_size}#", "set_device_id=#{set_device_id}#", "images_directory=#{images_directory}#" ]] ],
+
+    "bias": [ "^^", "dig", "compiled_model_source_entry.bias" ],
+
+    "dataset_imagenet_preprocessed_query": [ "^^", "substitute", [["quantized", "dataset_name=imagenet","preprocess_method=opencv", "quantize_method=untether", "dataset_size=#{loadgen_dataset_size}#", "bias=#{bias}#", "images_directory=#{images_directory}#" ]] ],
+
+    "dataset_imagenet_preprocessed_subset_fof":[ "^^", "execute", [[
+        [ "get_kernel" ],
+        [ "byquery", [[ "^^", "get", "dataset_imagenet_preprocessed_query" ]], {}, ["dataset_imagenet_preprocessed_query"] ],
+        [ "get_path", [[ "quantized", "image_list.txt" ]] ]
+    ]] ],
+
+    "dataset_imagenet_preprocessed_dir":[ "^^", "execute", [[
+        [ "get_kernel" ],
+        [ "byquery", [[ "^^", "get", "dataset_imagenet_preprocessed_query" ]], {}, ["dataset_imagenet_preprocessed_query"] ],
+        [ "get_path", "quantized" ]
+    ]] ],
+
+    "kilt_device_uai_model_batch_size": [ "^^", "get_config_from_sut", ["uai_model_batch_size", 10] ],
+    "kilt_model_batch_size": [ "^^", "get_config_from_sut", ["recommended_batch_size", 10] ],
+    "kilt_max_wait_abs": [ "^^", "get_config_from_sut", ["recommended_max_wait_abs", ""] ],
+    "kilt_datasource_config":  [ "^^", "get_config_from_sut", ["kilt_datasource_config", null] ],
+    "kilt_device_config":  [ "^^", "get_config_from_sut", ["kilt_device_config", null] ],
+    "kilt_device_ringfence_driver":  [ "^^", "get_config_from_sut", ["kilt_device_ringfence_driver", null] ],
+    "kilt_device_enqueue_yield_time":  [ "^^", "get_config_from_sut", ["kilt_device_enqueue_yield_time", null] ],
+    "kilt_device_scheduler_yield_time":  [ "^^", "get_config_from_sut", ["kilt_device_scheduler_yield_time", null] ],
+    "kilt_dispatch_yield_time":  [ "^^", "get_config_from_sut", ["kilt_dispatch_yield_time", null] ],
+    "kilt_scheduler_yield_time":  [ "^^", "get_config_from_sut", ["kilt_scheduler_yield_time", null] ],
+    "kilt_unique_server_id":  [ "^^", "get_config_from_sut", ["kilt_unique_server_id", null] ],
+
+    "kilt_device_ids": [ "^^", "get_config_from_sut", ["device_id", "0"] ],
+    "kilt_affinity": [ "^^", "get_config_from_sut", ["kilt_affinity", null] ],
+
+    "kilt_device_uai_queue_length": [ "^^", "get_config_from_sut", [ "kilt_device_uai_queue_length", 10] ],
+    "kilt_device_uai_scheduler_yield_time": [ "^^", "get_config_from_sut", [ "kilt_device_uai_scheduler_yield_time", 0] ],
+    "kilt_device_uai_postprocessor_time": [ "^^", "get_config_from_sut", [ "kilt_device_uai_postprocessor_time", 0] ],
+    "kilt_device_uai_flush_yield_time": [ "^^", "get_config_from_sut", [ "kilt_device_uai_flush_yield_time", 10] ],
+    "kilt_device_uai_wait_timeout": [ "^^", "get_config_from_sut", [ "kilt_device_uai_wait_timeout", -1] ],
+    "kilt_device_uai_flush_immediately": [ "^^", "case", [[ "^^", "get", "loadgen_scenario" ],
+        "SingleStream", false
+    ], { "default_value": false } ],
+    "loadgen_buffer_size_name": [ "^^", "case", [[ "^^", "get", "loadgen_mode" ],
+       "AccuracyOnly", "loadgen_buffer_size_accuracy" ],
+       { "default_value": "loadgen_buffer_size_performance" }
+    ],
+    "kilt_device_uai_model_before_flush_wait_time": [ "^^", "get_config_from_sut", [ "uai_model_before_flush_wait_time", 5000000] ],
+
+    "loadgen_buffer_size": [ "^^", "get_config_from_sut", [ [ "^^", "get", "loadgen_buffer_size_name"], 2000] ],
+    "loadgen_target_qps": [ "^^", "get_config_from_sut", ["loadgen_target_qps", null] ],
+    "loadgen_target_latency": [ "^^", "get_config_from_sut", ["loadgen_target_latency", null] ],
+    "loadgen_multistreamness": null,
+    "loadgen_min_query_count": null,
+    "loadgen_max_query_count": null,
+    "loadgen_min_duration_s": null,
+    "loadgen_max_duration_s": null ,
+    "loadgen_compliance_test": false,
+
+    "speedai_devices": [ "^^", "get_config_from_sut", ["speedai_devices", "*"] ],
+    "device_to_fanspeed": [ "^^", "get_config_from_sut", ["device_to_fanspeed", ""] ],
+    "perf_mode":  [ "^^", "get_config_from_sut", ["perf_mode", "ECO"] ],
+
+    "set_fan": false,
+
+    "jemalloc_path": [ "^^", "execute", [[
+        [ "get_kernel" ],
+        [ "byquery", "compiled,jemalloc" ],
+        [ "get_path_of", "libjemalloc" ]
+    ]]],
+
+    "untether_path": "/opt/untether",
+
+    "extra_env": {
+        "LD_LIBRARY_PATH": [ "^^", "substitute", "#{untether_path}#/speedai/lib"],
+        "KILT_JSON_CONFIG": [ "^^", "substitute", "#{input_parameters_file_path}#" ],
+        "LD_PRELOAD": [ "^^", "get", "jemalloc_path" ],
+        "SPEEDAI_BACKEND": [ "^^", "substitute", "#{untether_path}#/speedai/lib/libspeedai/hw/libspeedai.so"],
+        "SPEEDAI_BACKEND_PREFIX": [ "^^", "substitute", "#{untether_path}#/speedai/lib"],
+        "UNTETHER_BANK_PATH": [ "^^", "substitute", "#{untether_path}#/speedai/libexec/bankprogs"],
+        "SPEEDAI_SOCKET_RESET": 0,
+        "BOQ_TARGET": "speedAI240BC-ES",
+        "SPEEDAI_DEVICES": [ "^^", "substitute", "#{speedai_devices}#" ]
+    },
+
+    "output_entry_parents": [ "AS^IS", "AS^IS", ["^", "byname", "base_image_classification_loadgen_experiment"] ],
+    "output_entry_param_names": [
+        "device",
+        "fan",
+        "fan_rpm",
+        "set_fan",
+        "kilt_datasource_config",
+        "kilt_device_config",
+        "kilt_device_ringfence_driver",
+        "kilt_device_enqueue_yield_time",
+        "kilt_device_scheduler_yield_time",
+        "kilt_dispatch_yield_time",
+        "kilt_scheduler_yield_time",
+        "kilt_unique_server_id",
+        "loadgen_compliance_test",
+        "loadgen_query_count",
+        "loadgen_max_query_count",
+        "loadgen_min_query_count",
+        "loadgen_multistreamness",
+        "loadgen_target_latency",
+        "loadgen_target_qps",
+        "loadgen_trigger_cold_run",
+        "verbosity",
+
+        "input_data_types",
+        "retrained",
+        "url",
+        "weight_data_types",
+        "weight_transformations",
+
+        "dataset_imagenet_preprocessed_dir",
+        "dataset_imagenet_preprocessed_input_square_side",
+        "dataset_imagenet_preprocessed_subset_fof",
+        "ml_model_has_background_class",
+
+        "kilt_device_uai_queue_length",
+        "kilt_device_uai_scheduler_yield_time",
+        "kilt_device_uai_postprocessor_time",
+        "kilt_device_uai_flush_yield_time",
+        "kilt_device_uai_flush_immediately",
+
+        "kilt_model_batch_size",
+        "kilt_affinity",
+        "kilt_device_ids",
+        "kilt_max_wait_abs",
+
+        "kilt_device_uai_model_batch_size",
+        "kilt_device_uai_model_before_flush_wait_time",
+        "kilt_device_uai_wait_timeout"
+    ],
+    "output_entry_subs_listmap": [
+        "kilt_model_name", "#{model_name}#",
+        "kilt_input_format", "#{model_input_format}#",
+        "kilt_model_root", "#{compiled_model_source}#",
+        "kilt_output_format", "#{model_output_format}#",
+
+        "duration", 120, 
+        "pre_post_processing", "off"
+    ],
+
+    "fanspeed_command": [ "^^", "generate_fanspeed_command"],
+
+    "shell_cmd_with_subs": [ "^^", "substitute", "speedai smi --set-mode #{perf_mode}# && #{fanspeed_command}# #{program_binary_path}#"]
+}
